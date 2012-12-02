@@ -1,0 +1,33 @@
+body {
+	background-color: #ffffff;
+	font: 100% sans-serif;
+}
+#field td {
+	width:46px;
+	height:46px;
+}
+#selector a {
+	margin-right:8px;
+	text-decoration:none;
+}
+#wrapper{
+	width:800px;
+}
+#content{
+	float:left;
+	width:500px;
+}
+#side{
+	float:left;
+	width:250px;
+}
+.box{
+	width:100%;
+	padding:10px;
+	margin-bottom:10px;
+	border:1px solid #999999;
+	background-color:#cccccc;
+}
+#selector {
+	margin-bottom:20px;
+}
