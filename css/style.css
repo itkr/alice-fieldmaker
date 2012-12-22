@@ -2,10 +2,10 @@ body {
 	background-color: #ffffff;
 	font: 100% sans-serif;
 }
-#field td {
-	width:46px;
-	height:46px;
-}
+//#field td {
+//	width:46px;
+//	height:46px;
+//}
 #selector a {
 	margin-right:8px;
 	text-decoration:none;

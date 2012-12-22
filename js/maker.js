@@ -1,72 +1,90 @@
-(function() {
+(function(document) {
+
 	var $ = function(id) { return document.getElementById(id); },
 	DIR = 'images/',
 	PANELS = 'panels.png',
-	size = 10,
+	PANEL_SIZE = 48,
+	PANEL_LENGTH = 10,
 	currentPanelId = 0,
 	fieldList = [],
-	imageFileNames = ['panel_wall.png','panel_top_bottom.png','panel_left_right.png','panel_top_left.png','panel_top_right.png','panel_bottom_left.png','panel_bottom_right.png','panel_flat.png'];
+	imageFileNames = [
+		'panel_wall.png',
+		'panel_top_bottom.png',
+		'panel_left_right.png',
+		'panel_top_left.png',
+		'panel_top_right.png',
+		'panel_bottom_left.png',
+		'panel_bottom_right.png',
+		'panel_flat.png'
+	];
 
 	window.onload = function() {
-		makeField();
-		setSelectors();
-		var setAct = function(obj, i){
-			return function(){
-				this.style.backgroundPosition = -(currentPanelId * 48).toString() + 'px' + ' 0';
-				fieldList[i] = currentPanelId;
-				$('output').innerHTML = fieldList;
-			};
-		};
-		for(var i=0;i<$('newTable').getElementsByTagName('td').length;i++) {
-			$('field').getElementsByTagName('td')[i].onclick = setAct(this, i);
-		}
-		$('output').innerHTML = fieldList;
+		initField($('field'), PANEL_LENGTH, PANEL_SIZE);
+		initSelectors($('selector'));
+		$('output').innerHTML = fieldList;  // 表示させるのは仮
 	};
-	function makeField() {
-		var field = $('field'),
-		newTable = document.createElement('table'),
-		newTr,
-		newTd,
-		newText;
-		newTable.setAttribute('id','newTable')
-		for(var i=0;i<size*size;i++) {
-			if(i%size===0) {
+
+	/**
+	 * フィールドを初期化する
+	 * @param : element 表示先element
+	 * @param : panel_len 作成するマップの行数・列数
+	 * @param : panel_size 表示するマップの１セルの辺の長さ(px)
+	 */
+	function initField(element, panel_len, panel_size) {
+		var newTable = document.createElement('table'); 
+		var newTr, newTd, newText;
+		for(var i=0; i<panel_len*panel_len; i++) {
+			if(i % panel_len === 0) {
 				newTr = document.createElement('tr');
 				newTable.appendChild(newTr);
 			}
 			newText = document.createTextNode('');
 			newTd = document.createElement('td');
+			newTd.style.width = panel_size - 2 + 'px';
+			newTd.style.height = panel_size - 2 + 'px';
 			newTd.style.backgroundColor = '#cccccc';
-			newTd.style.backgroundImage = 'url('+DIR+PANELS+')';
-			if(i%size===0||i<size||i>size*size-size||i%size==size-1) {
-				newTd.style.backgroundPosition = 0 * 48 + 'px' + ' 0';
+			newTd.style.backgroundImage = 'url(' + DIR + PANELS + ')';
+			newTd.style.backgroundSize = panel_size * imageFileNames.length + 'px ' + panel_size + 'px';
+			if(i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
+				newTd.style.backgroundPosition = 0 * panel_size + 'px' + ' 0';
 				currentPanelId = 0;
 			} else {
-				newTd.style.backgroundPosition = 1 * 48 + 'px' + ' 0';
+				newTd.style.backgroundPosition = 1 * panel_size + 'px' + ' 0';
 				currentPanelId = 7;
 			}
 			newTd.appendChild(newText);
 			newTr.appendChild(newTd);
+			(function(_i){
+				newTd.onclick = function(){
+					this.style.backgroundPosition = - (currentPanelId * PANEL_SIZE).toString() + 'px' + ' 0';
+					fieldList[_i] = currentPanelId;
+					$('output').innerHTML = fieldList;  // 表示させるのは仮
+				};
+			})(i);
 			fieldList[i] = currentPanelId;
 		}
 		newTable.style.backgroundColor = '#000000';
-		newTable.setAttribute('cellspacing','1');
-		field.appendChild(newTable);
+		newTable.setAttribute('cellspacing', '1');
+		element.appendChild(newTable);
 	}
 
-	function setSelectors() {
-		var images = $('selector').getElementsByTagName('img');
-		for(var i=0;i<imageFileNames.length;i++) {
+	/**
+	 * セレクタを初期化する
+	 * @param : element 表示先element
+	 */
+	function initSelectors(element) {
+		var images = element.getElementsByTagName('img');
+		for(var i=0; i<imageFileNames.length; i++) {
 			(function(_i) {
 				var newA = document.createElement('a');
 				var newImg = document.createElement('img');
-				newImg.setAttribute('src',DIR + imageFileNames[_i]);
+				newImg.setAttribute('src', DIR + imageFileNames[_i]);
 				newImg.style.border = '3px solid #ffffff';
 				newA.setAttribute('href','javascript:void(0)');
 				newA.appendChild(newImg);
-				$('selector').appendChild(newA);
+				element.appendChild(newA);
 				newA.onclick = function() {
-					for(var x=0;x<images.length;x++) {
+					for(var x=0; x<images.length; x++) {
 						images[x].style.border = '3px solid #ffffff';
 					}
 					images[_i].style.border = '3px solid #ff0000';
@@ -77,4 +95,4 @@
 		images[0].style.border = '3px solid #ff0000';
 	}
 
-})();
+})(this.document);
