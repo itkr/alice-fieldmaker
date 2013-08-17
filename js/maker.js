@@ -1,40 +1,119 @@
+(function(global, document) {
+
+	var $ = function(id) {
+		return document.getElementById(id);
+	};
+
+	var self = {};
+
+	self.models = (function() {
+		var objects = {
+
+			/**
+			 * ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰å…¨ä½“ã®çŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹
+			 */
+			Field : function(element) {
+
+			},
+
+			/**
+			 * ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã®ä¸­ã®ãƒ‘ãƒãƒ«ä¸€ã¤ä¸€ã¤ã®çŠ¶æ…‹ã‚’ç®¡ç†ã™ã‚‹
+			 */
+			Panel : function(element) {
+				var that = this;
+				this.C = {
+					STATUS_WALL : 0,
+					STATUS_TOPBOTTOM : 1,
+					STATUS_LEFTRIGHT : 2,
+					STATUS_TOPLEFT : 3,
+					STATUS_TOPRIGHT : 4,
+					STATUS_BOTTOMLEFT : 5,
+					STATUS_BOTTOMRIGHT : 6,
+					STATUS_FLAT : 7
+				}
+				var status = 0;
+
+				this.setStatus = function(type) {
+					status = type;
+					return that;
+				};
+
+				this.getStatus = function() {
+					return status;
+				}
+			},
+
+			SelectorButton : function(element, type) {
+				var type = 0;
+				var selected = false;
+				this.is_selected = function() {
+					return selected;
+				};
+				this.select = function() {
+					selected = true;
+					return this;
+				};
+				this.unselect = function() {
+					selected = false;
+					return this;
+				};
+				this.getType = function() {
+					return type;
+				};
+			},
+
+			SelectorField : function(element) {
+				var selectorButtons = [];
+
+				this.appendSelectorButtons = function(elem, type) {
+					selectorButtons.push(new self.SelectorButton(elem, type));
+				};
+
+			}
+		};
+		return objects;
+	})();
+
+	self.API = (function() {
+		var objects = {};
+		return objects;
+	})();
+
+	global.FieldMaker = self.API;
+
+})(this, this.document);
+
 (function(document) {
 
-	var $ = function(id) { return document.getElementById(id); },
-	DIR = 'images/',
-	PANELS = 'panels.png',
-	PANEL_SIZE = 48,
-	PANEL_LENGTH = 10,
-	currentPanelId = 0,
-	fieldList = [],
-	imageFileNames = [
-		'panel_wall.png',
-		'panel_top_bottom.png',
-		'panel_left_right.png',
-		'panel_top_left.png',
-		'panel_top_right.png',
-		'panel_bottom_left.png',
-		'panel_bottom_right.png',
-		'panel_flat.png'
-	];
+	var $ = function(id) {
+		return document.getElementById(id);
+	}
+	var DIR = 'images/';
+	var PANELS = 'panels.png';
+	var PANEL_SIZE = 48;
+	var PANEL_LENGTH = 10;
+	var currentPanelId = 0;
+	var fieldList = [];
+	var imageFileNames = ['panel_wall.png', 'panel_top_bottom.png', 'panel_left_right.png', 'panel_top_left.png', 'panel_top_right.png', 'panel_bottom_left.png', 'panel_bottom_right.png', 'panel_flat.png'];
 
 	window.onload = function() {
 		initField($('field'), PANEL_LENGTH, PANEL_SIZE);
 		initSelectors($('selector'));
-		$('output').innerHTML = fieldList;  // •\¦‚³‚¹‚é‚Ì‚Í‰¼
+		// è¡¨ç¤ºã•ã›ã‚‹ã®ã¯ä»®
+		$('output').innerHTML = fieldList;
 	};
 
 	/**
-	 * ƒtƒB[ƒ‹ƒh‚ğ‰Šú‰»‚·‚é
-	 * @param : element •\¦æelement
-	 * @param : panel_len ì¬‚·‚éƒ}ƒbƒv‚Ìs”E—ñ”
-	 * @param : panel_size •\¦‚·‚éƒ}ƒbƒv‚Ì‚PƒZƒ‹‚Ì•Ó‚Ì’·‚³(px)
+	 * ãƒ•ã‚£ãƒ¼ãƒ«ãƒ‰ã‚’åˆæœŸåŒ–ã™ã‚‹
+	 * @param : element è¡¨ç¤ºå…ˆelement
+	 * @param : panel_len ä½œæˆã™ã‚‹ãƒãƒƒãƒ—ã®è¡Œæ•°ãƒ»åˆ—æ•°
+	 * @param : panel_size è¡¨ç¤ºã™ã‚‹ãƒãƒƒãƒ—ã®ï¼‘ã‚»ãƒ«ã®è¾ºã®é•·ã•(px)
 	 */
 	function initField(element, panel_len, panel_size) {
-		var newTable = document.createElement('table'); 
+		var newTable = document.createElement('table');
 		var newTr, newTd, newText;
-		for(var i=0; i<panel_len*panel_len; i++) {
-			if(i % panel_len === 0) {
+		for (var i = 0; i < panel_len * panel_len; i++) {
+			if (i % panel_len === 0) {
 				newTr = document.createElement('tr');
 				newTable.appendChild(newTr);
 			}
@@ -45,7 +124,7 @@
 			newTd.style.backgroundColor = '#cccccc';
 			newTd.style.backgroundImage = 'url(' + DIR + PANELS + ')';
 			newTd.style.backgroundSize = panel_size * imageFileNames.length + 'px ' + panel_size + 'px';
-			if(i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
+			if (i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
 				newTd.style.backgroundPosition = 0 * panel_size + 'px' + ' 0';
 				currentPanelId = 0;
 			} else {
@@ -54,11 +133,12 @@
 			}
 			newTd.appendChild(newText);
 			newTr.appendChild(newTd);
-			(function(_i){
-				newTd.onclick = function(){
-					this.style.backgroundPosition = - (currentPanelId * PANEL_SIZE).toString() + 'px' + ' 0';
+			(function(_i) {
+				newTd.onclick = function() {
+					this.style.backgroundPosition = -(currentPanelId * PANEL_SIZE).toString() + 'px' + ' 0';
 					fieldList[_i] = currentPanelId;
-					$('output').innerHTML = fieldList;  // •\¦‚³‚¹‚é‚Ì‚Í‰¼
+					// è¡¨ç¤ºã•ã›ã‚‹ã®ã¯ä»®
+					$('output').innerHTML = fieldList;
 				};
 			})(i);
 			fieldList[i] = currentPanelId;
@@ -69,22 +149,22 @@
 	}
 
 	/**
-	 * ƒZƒŒƒNƒ^‚ğ‰Šú‰»‚·‚é
-	 * @param : element •\¦æelement
+	 * ã‚»ãƒ¬ã‚¯ã‚¿ã‚’åˆæœŸåŒ–ã™ã‚‹
+	 * @param : element è¡¨ç¤ºå…ˆelement
 	 */
 	function initSelectors(element) {
 		var images = element.getElementsByTagName('img');
-		for(var i=0; i<imageFileNames.length; i++) {
+		for (var i = 0; i < imageFileNames.length; i++) {
 			(function(_i) {
 				var newA = document.createElement('a');
 				var newImg = document.createElement('img');
 				newImg.setAttribute('src', DIR + imageFileNames[_i]);
 				newImg.style.border = '3px solid #ffffff';
-				newA.setAttribute('href','javascript:void(0)');
+				newA.setAttribute('href', 'javascript:void(0)');
 				newA.appendChild(newImg);
 				element.appendChild(newA);
 				newA.onclick = function() {
-					for(var x=0; x<images.length; x++) {
+					for (var x = 0; x < images.length; x++) {
 						images[x].style.border = '3px solid #ffffff';
 					}
 					images[_i].style.border = '3px solid #ff0000';
