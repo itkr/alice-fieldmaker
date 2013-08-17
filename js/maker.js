@@ -46,6 +46,10 @@
 			SelectorButton : function(element, type) {
 				var type = type;
 				var selected = false;
+				var STYLES = {
+					selecting : '3px solid #ff0000',
+					unselecting : '3px solid #ffffff'
+				}
 
 				this.element = element;
 				this.is_selected = function() {
@@ -53,14 +57,14 @@
 				};
 				this.select = function() {
 					selected = true;
-					element.style.border = '3px solid #ff0000';
 					//仮
+					element.style.border = STYLES.selecting;
 					return this;
 				};
 				this.unselect = function() {
 					selected = false;
-					element.style.border = '3px solid #ffffff';
 					//仮
+					element.style.border = STYLES.unselecting;
 					return this;
 				};
 				this.getType = function() {
@@ -72,11 +76,14 @@
 				var selectorButtons = [];
 				var selectingButtonType = 0;
 
+				// 仮
+				this.element = element;
+
 				this.appendSelectorButtons = function(elem, type) {
 					var button = new self.models.SelectorButton(elem, type);
 					selectorButtons.push(button);
+					// 仮
 					return button;
-					// 仮
 				};
 
 				this.getSelectorButtons = function() {
@@ -120,14 +127,13 @@
 	var PANELS = 'panels.png';
 	var PANEL_SIZE = 48;
 	var PANEL_LENGTH = 10;
-	var currentPanelId = 0;
-	var selectorField;
 	var fieldList = [];
 	var imageFileNames = ['panel_wall.png', 'panel_top_bottom.png', 'panel_left_right.png', 'panel_top_left.png', 'panel_top_right.png', 'panel_bottom_left.png', 'panel_bottom_right.png', 'panel_flat.png'];
 
 	window.onload = function() {
-		initField($('field'), PANEL_LENGTH, PANEL_SIZE);
-		initSelectors($('selector'));
+		var selectorField = new FieldMaker.models.SelectorField($('selector'))
+		initSelectors(selectorField.element, selectorField);
+		initField($('field'), PANEL_LENGTH, PANEL_SIZE, selectorField);
 		// 表示させるのは仮
 		$('output').innerHTML = fieldList;
 	};
@@ -138,7 +144,7 @@
 	 * @param : panel_len 作成するマップの行数・列数
 	 * @param : panel_size 表示するマップの１セルの辺の長さ(px)
 	 */
-	function initField(element, panel_len, panel_size) {
+	function initField(element, panel_len, panel_size, selectorField) {
 		var newTable = document.createElement('table');
 		var newTr;
 		var newTd;
@@ -156,29 +162,29 @@
 			newTd.style.backgroundColor = '#cccccc';
 			newTd.style.backgroundImage = 'url(' + DIR + PANELS + ')';
 			newTd.style.backgroundSize = panel_size * imageFileNames.length + 'px ' + panel_size + 'px';
-			
+
 			//初期表示の変化を付けてる
 			if (i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
 				newTd.style.backgroundPosition = 0 * panel_size + 'px' + ' 0';
-				currentPanelId = 0;
+				selectorField.setSelecting(0);
 			} else {
 				newTd.style.backgroundPosition = 1 * panel_size + 'px' + ' 0';
-				currentPanelId = 7;
+				selectorField.setSelecting(7);
 			}
-			
+
 			newTd.appendChild(newText);
 			newTr.appendChild(newTd);
 
 			(function(_i) {
 				newTd.onclick = function() {
-					this.style.backgroundPosition = -(currentPanelId * PANEL_SIZE).toString() + 'px' + ' 0';
-					fieldList[_i] = currentPanelId;
+					this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
+					fieldList[_i] = selectorField.getSelecting();
 					// 表示させるのは仮
 					$('output').innerHTML = fieldList;
 				};
 			})(i);
 
-			fieldList[i] = currentPanelId;
+			fieldList[i] = selectorField.getSelecting();
 		}
 		newTable.style.backgroundColor = '#000000';
 		newTable.setAttribute('cellspacing', '1');
@@ -189,9 +195,8 @@
 	 * セレクタを初期化する
 	 * @param : element 表示先element
 	 */
-	function initSelectors(element) {
+	function initSelectors(element, selectorField) {
 		var selectorButton;
-		selectorField = new FieldMaker.models.SelectorField(element);
 		for (var i = 0; i < imageFileNames.length; i++) {
 			var newImg = document.createElement('img');
 			selectorButton = selectorField.appendSelectorButtons(newImg, i);
@@ -200,7 +205,6 @@
 			(function(_i) {
 				selectorButton.element.onclick = function() {
 					selectorField.setSelecting(_i);
-					currentPanelId = _i;
 				};
 			})(i);
 		}
