@@ -18,9 +18,10 @@
 
 			/**
 			 * フィールドの中のパネル一つ一つの状態を管理する
+			 * 引数は仮
 			 */
-			Panel : function(element) {
-				var that = this;
+			Panel : function(element, panel_size, imgFileName, imgSize) {
+
 				this.C = {
 					STATUS_WALL : 0,
 					STATUS_TOPBOTTOM : 1,
@@ -33,9 +34,22 @@
 				}
 				var status = 0;
 
+				//仮
+				this.element = element;
+
+				// initial(仮)
+				element.style.width = panel_size - 2 + 'px';
+				element.style.height = panel_size - 2 + 'px';
+				element.style.backgroundColor = '#cccccc';
+				element.style.backgroundImage = 'url(' + imgFileName + ')';
+				element.style.backgroundSize = imgSize;
+				element.appendChild(document.createTextNode(''));
+
 				this.setStatus = function(type) {
 					status = type;
-					return that;
+					//仮
+					element.style.backgroundPosition = -(type * panel_size).toString() + 'px' + ' 0';
+					return this;
 				};
 
 				this.getStatus = function() {
@@ -148,35 +162,34 @@
 		var newTable = document.createElement('table');
 		var newTr;
 		var newTd;
-		var newText;
+		var panel;
+		var imgFileName;
+		var imgSize;
 		var i = 0;
 		for ( i = 0; i < panel_len * panel_len; i++) {
 			if (i % panel_len === 0) {
 				newTr = document.createElement('tr');
 				newTable.appendChild(newTr);
 			}
-			newText = document.createTextNode('');
+
 			newTd = document.createElement('td');
-			newTd.style.width = panel_size - 2 + 'px';
-			newTd.style.height = panel_size - 2 + 'px';
-			newTd.style.backgroundColor = '#cccccc';
-			newTd.style.backgroundImage = 'url(' + DIR + PANELS + ')';
-			newTd.style.backgroundSize = panel_size * imageFileNames.length + 'px ' + panel_size + 'px';
+			imgFileName = (DIR + PANELS);
+			imgSize = (panel_size * imageFileNames.length + 'px ' + panel_size + 'px');
+
+			panel = new FieldMaker.models.Panel(newTd, panel_size, imgFileName, imgSize);
 
 			//初期表示の変化を付けてる
+			// 仮　定数をスタティックに呼び出したい
+			selectorField.setSelecting(panel.C.STATUS_FLAT);
 			if (i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
-				newTd.style.backgroundPosition = 0 * panel_size + 'px' + ' 0';
-				selectorField.setSelecting(0);
-			} else {
-				newTd.style.backgroundPosition = 1 * panel_size + 'px' + ' 0';
-				selectorField.setSelecting(7);
+				selectorField.setSelecting(panel.C.STATUS_WALL);
 			}
 
-			newTd.appendChild(newText);
-			newTr.appendChild(newTd);
+			panel.setStatus(selectorField.getSelecting());
+			newTr.appendChild(panel.element);
 
 			(function(_i) {
-				newTd.onclick = function() {
+				panel.element.onclick = function() {
 					this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
 					fieldList[_i] = selectorField.getSelecting();
 					// 表示させるのは仮
