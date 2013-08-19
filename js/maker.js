@@ -29,7 +29,7 @@
 			 * フィールドの中のパネル一つ一つの状態を管理する
 			 * 引数は仮
 			 */
-			Panel : function(element, panel_size, imgFileName, imgSize) {
+			Panel : function(element, imgFileName) {
 
 				this.C = {
 					STATUS_WALL : 0,
@@ -46,11 +46,11 @@
 
 				// initial(仮)
 				var init = function() {
-					element.style.width = panel_size - 2 + 'px';
-					element.style.height = panel_size - 2 + 'px';
+					element.style.width = PANEL_SIZE - 2 + 'px';
+					element.style.height = PANEL_SIZE - 2 + 'px';
 					element.style.backgroundColor = '#cccccc';
-					element.style.backgroundImage = 'url(' + imgFileName + ')';
-					element.style.backgroundSize = imgSize;
+					element.style.backgroundImage = 'url(' + DIR + PANELS + ')';
+					element.style.backgroundSize = (PANEL_SIZE * PANEL_KIND_NUMBER + 'px ' + PANEL_SIZE + 'px');;
 					element.appendChild(document.createTextNode(''));
 				};
 
@@ -60,7 +60,7 @@
 				this.setStatus = function(type) {
 					status = type;
 					//仮
-					element.style.backgroundPosition = -(type * panel_size).toString() + 'px' + ' 0';
+					element.style.backgroundPosition = -(type * PANEL_SIZE).toString() + 'px' + ' 0';
 					return this;
 				};
 
@@ -183,8 +183,6 @@
 		var newTr;
 		var newTd;
 		var panel;
-		var imgFileName;
-		var imgSize;
 		var i = 0;
 
 		for ( i = 0; i < panel_len * panel_len; i++) {
@@ -193,9 +191,7 @@
 				newTable.appendChild(newTr);
 			}
 			newTd = document.createElement('td');
-			imgFileName = (DIR + PANELS);
-			imgSize = (panel_size * PANEL_KIND_NUMBER + 'px ' + panel_size + 'px');
-			panel = new FieldMaker.models.Panel(newTd, panel_size, imgFileName, imgSize);
+			panel = new FieldMaker.models.Panel(newTd, panel_size);
 
 			//初期表示の変化を付けてる
 			// 仮　定数をスタティックに呼び出したい
@@ -209,7 +205,7 @@
 
 			(function(_i) {
 				panel.element.onclick = function() {
-					this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
+					this.style.backgroundPosition = -(selectorField.getSelecting() * panel_size).toString() + 'px' + ' 0';
 					fieldList[_i] = selectorField.getSelecting();
 					// 表示させるのは仮
 					$('output').innerHTML = fieldList;
