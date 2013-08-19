@@ -29,7 +29,7 @@
 			 * フィールドの中のパネル一つ一つの状態を管理する
 			 * 引数は仮
 			 */
-			Panel : function(element, imgFileName) {
+			Panel : function(element, selectorField, fieldList, position) {
 
 				this.C = {
 					STATUS_WALL : 0,
@@ -50,8 +50,15 @@
 					element.style.height = PANEL_SIZE - 2 + 'px';
 					element.style.backgroundColor = '#cccccc';
 					element.style.backgroundImage = 'url(' + DIR + PANELS + ')';
-					element.style.backgroundSize = (PANEL_SIZE * PANEL_KIND_NUMBER + 'px ' + PANEL_SIZE + 'px');;
+					element.style.backgroundSize = (PANEL_SIZE * PANEL_KIND_NUMBER + 'px ' + PANEL_SIZE + 'px');
 					element.appendChild(document.createTextNode(''));
+					element.onclick = function() {
+						this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
+						fieldList[position] = selectorField.getSelecting();
+						// 表示させるのは仮
+						$('output').innerHTML = fieldList;
+					};
+
 				};
 
 				//仮
@@ -184,34 +191,21 @@
 		var newTd;
 		var panel;
 		var i = 0;
-
 		for ( i = 0; i < panel_len * panel_len; i++) {
 			if (i % panel_len === 0) {
 				newTr = document.createElement('tr');
 				newTable.appendChild(newTr);
 			}
 			newTd = document.createElement('td');
-			panel = new FieldMaker.models.Panel(newTd, panel_size);
-
+			panel = new FieldMaker.models.Panel(newTd, selectorField, fieldList, i);
 			//初期表示の変化を付けてる
 			// 仮　定数をスタティックに呼び出したい
 			selectorField.setSelecting(panel.C.STATUS_FLAT);
 			if (i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
 				selectorField.setSelecting(panel.C.STATUS_WALL);
 			}
-
 			panel.setStatus(selectorField.getSelecting());
 			newTr.appendChild(panel.element);
-
-			(function(_i) {
-				panel.element.onclick = function() {
-					this.style.backgroundPosition = -(selectorField.getSelecting() * panel_size).toString() + 'px' + ' 0';
-					fieldList[_i] = selectorField.getSelecting();
-					// 表示させるのは仮
-					$('output').innerHTML = fieldList;
-				};
-			})(i);
-
 			fieldList[i] = selectorField.getSelecting();
 		}
 		newTable.style.backgroundColor = '#000000';
