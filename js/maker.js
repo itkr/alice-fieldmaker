@@ -1,5 +1,14 @@
 (function(global, document) {
 
+	// 仮
+	// この辺りの定数はinit()などで実装パートから定義する
+	// なので今は実装パートと同じ物を書いている
+	var DIR = 'images/';
+	var PANELS = 'panels.png';
+	var PANEL_SIZE = 48;
+	var PANEL_LENGTH = 10;
+	var PANEL_KIND_NUMBER = 8;
+
 	var $ = function(id) {
 		return document.getElementById(id);
 	};
@@ -92,17 +101,22 @@
 			},
 
 			SelectorField : function(element) {
+				var that = this;
 				var selectorButtons = [];
 				var selectingButtonType = 0;
-
-				// 仮
-				this.element = element;
 
 				this.appendSelectorButtons = function(elem, type) {
 					var button = new self.models.SelectorButton(elem, type);
 					selectorButtons.push(button);
-					// 仮
-					return button;
+					elem.style.width = PANEL_SIZE + 'px';
+					elem.style.height = PANEL_SIZE + 'px';
+					elem.style.backgroundImage = 'url(' + (DIR + PANELS) + ')'
+					elem.style.backgroundPosition = -(type * PANEL_SIZE).toString() + 'px' + ' 0';
+					elem.onclick = function() {
+						that.setSelecting(type);
+					};
+					element.appendChild(elem);
+					return this;
 				};
 
 				this.getSelectorButtons = function() {
@@ -141,17 +155,18 @@
 
 	var $ = function(id) {
 		return document.getElementById(id);
-	}
+	};
+
 	var DIR = 'images/';
 	var PANELS = 'panels.png';
 	var PANEL_SIZE = 48;
 	var PANEL_LENGTH = 10;
+	var PANEL_KIND_NUMBER = 8;
 	var fieldList = [];
-	var imageFileNames = ['panel_wall.png', 'panel_top_bottom.png', 'panel_left_right.png', 'panel_top_left.png', 'panel_top_right.png', 'panel_bottom_left.png', 'panel_bottom_right.png', 'panel_flat.png'];
 
 	window.onload = function() {
 		var selectorField = new FieldMaker.models.SelectorField($('selector'))
-		initSelectors(selectorField.element, selectorField);
+		initSelectors(selectorField);
 		initField($('field'), PANEL_LENGTH, PANEL_SIZE, selectorField);
 		// 表示させるのは仮
 		$('output').innerHTML = fieldList;
@@ -179,7 +194,7 @@
 			}
 			newTd = document.createElement('td');
 			imgFileName = (DIR + PANELS);
-			imgSize = (panel_size * imageFileNames.length + 'px ' + panel_size + 'px');
+			imgSize = (panel_size * PANEL_KIND_NUMBER + 'px ' + panel_size + 'px');
 			panel = new FieldMaker.models.Panel(newTd, panel_size, imgFileName, imgSize);
 
 			//初期表示の変化を付けてる
@@ -210,26 +225,12 @@
 
 	/**
 	 * セレクタを初期化する
-	 * @param : element 表示先element
+	 * @param : {SelectorField} selectorField
 	 */
-	function initSelectors(element, selectorField) {
-		var selectorButton;
-		for (var i = 0; i < imageFileNames.length; i++) {
-
-			var newDiv = document.createElement('div');
-
-			newDiv.style.width = PANEL_SIZE + 'px';
-			newDiv.style.height = PANEL_SIZE + 'px';
-			selectorButton = selectorField.appendSelectorButtons(newDiv, i);
-			newDiv.style.backgroundImage = 'url(' + (DIR + PANELS) + ')'
-			newDiv.style.backgroundPosition = -(i * PANEL_SIZE).toString() + 'px' + ' 0';
-
-			element.appendChild(selectorButton.element);
-			(function(_i) {
-				selectorButton.element.onclick = function() {
-					selectorField.setSelecting(_i);
-				};
-			})(i);
+	function initSelectors(selectorField) {
+		var i;
+		for ( i = 0; i < PANEL_KIND_NUMBER; i++) {
+			selectorField.appendSelectorButtons(document.createElement('div'), i);
 		}
 		selectorField.setSelecting(0);
 	}
