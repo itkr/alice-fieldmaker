@@ -32,18 +32,21 @@
 					STATUS_BOTTOMRIGHT : 6,
 					STATUS_FLAT : 7
 				}
+
 				var status = 0;
+
+				// initial(仮)
+				var init = function() {
+					element.style.width = panel_size - 2 + 'px';
+					element.style.height = panel_size - 2 + 'px';
+					element.style.backgroundColor = '#cccccc';
+					element.style.backgroundImage = 'url(' + imgFileName + ')';
+					element.style.backgroundSize = imgSize;
+					element.appendChild(document.createTextNode(''));
+				};
 
 				//仮
 				this.element = element;
-
-				// initial(仮)
-				element.style.width = panel_size - 2 + 'px';
-				element.style.height = panel_size - 2 + 'px';
-				element.style.backgroundColor = '#cccccc';
-				element.style.backgroundImage = 'url(' + imgFileName + ')';
-				element.style.backgroundSize = imgSize;
-				element.appendChild(document.createTextNode(''));
 
 				this.setStatus = function(type) {
 					status = type;
@@ -54,7 +57,9 @@
 
 				this.getStatus = function() {
 					return status;
-				}
+				};
+
+				init();
 			},
 
 			SelectorButton : function(element, type) {
@@ -166,16 +171,15 @@
 		var imgFileName;
 		var imgSize;
 		var i = 0;
+
 		for ( i = 0; i < panel_len * panel_len; i++) {
 			if (i % panel_len === 0) {
 				newTr = document.createElement('tr');
 				newTable.appendChild(newTr);
 			}
-
 			newTd = document.createElement('td');
 			imgFileName = (DIR + PANELS);
 			imgSize = (panel_size * imageFileNames.length + 'px ' + panel_size + 'px');
-
 			panel = new FieldMaker.models.Panel(newTd, panel_size, imgFileName, imgSize);
 
 			//初期表示の変化を付けてる
@@ -211,9 +215,15 @@
 	function initSelectors(element, selectorField) {
 		var selectorButton;
 		for (var i = 0; i < imageFileNames.length; i++) {
-			var newImg = document.createElement('img');
-			selectorButton = selectorField.appendSelectorButtons(newImg, i);
-			newImg.setAttribute('src', DIR + imageFileNames[selectorButton.getType()]);
+
+			var newDiv = document.createElement('div');
+
+			newDiv.style.width = PANEL_SIZE + 'px';
+			newDiv.style.height = PANEL_SIZE + 'px';
+			selectorButton = selectorField.appendSelectorButtons(newDiv, i);
+			newDiv.style.backgroundImage = 'url(' + (DIR + PANELS) + ')'
+			newDiv.style.backgroundPosition = -(i * PANEL_SIZE).toString() + 'px' + ' 0';
+
 			element.appendChild(selectorButton.element);
 			(function(_i) {
 				selectorButton.element.onclick = function() {
