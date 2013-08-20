@@ -1,3 +1,4 @@
+// ライブラリ部分
 (function(global, document) {
 
 	// 仮
@@ -22,7 +23,10 @@
 			 * フィールド全体の状態を管理する
 			 */
 			Field : function(element) {
+				var panels = [];
+				this.appendPanel = function() {
 
+				};
 			},
 
 			/**
@@ -44,7 +48,6 @@
 
 				var status = 0;
 
-				// initial(仮)
 				var init = function() {
 					element.style.width = PANEL_SIZE - 2 + 'px';
 					element.style.height = PANEL_SIZE - 2 + 'px';
@@ -58,7 +61,6 @@
 						// 表示させるのは仮
 						$('output').innerHTML = fieldList;
 					};
-
 				};
 
 				//仮
@@ -66,7 +68,6 @@
 
 				this.setStatus = function(type) {
 					status = type;
-					//仮
 					element.style.backgroundPosition = -(type * PANEL_SIZE).toString() + 'px' + ' 0';
 					return this;
 				};
@@ -78,7 +79,11 @@
 				init();
 			},
 
+			/**
+			 * パネルの種類を選択するためのボタン
+			 */
 			SelectorButton : function(element, type) {
+
 				var type = type;
 				var selected = false;
 				var STYLES = {
@@ -86,28 +91,34 @@
 					unselecting : '3px solid #ffffff'
 				}
 
-				this.element = element;
 				this.is_selected = function() {
 					return selected;
 				};
+
 				this.select = function() {
 					selected = true;
-					//仮
 					element.style.border = STYLES.selecting;
 					return this;
 				};
+
 				this.unselect = function() {
 					selected = false;
-					//仮
 					element.style.border = STYLES.unselecting;
 					return this;
 				};
+
 				this.getType = function() {
 					return type;
 				};
+
 			},
 
+			/**
+			 * パネルのボタンを選択するボタンを配置するフィールド
+			 * 基本的にこのオブジェクトは一つ作成し処理を委託する（仕様の拡張性のため設計上は複数作成できる）
+			 */
 			SelectorField : function(element) {
+
 				var that = this;
 				var selectorButtons = [];
 				var selectingButtonType = 0;
@@ -142,11 +153,17 @@
 				this.getSelecting = function() {
 					return selectingButtonType;
 				};
+
 			}
 		};
+
 		return objects;
+
 	})();
 
+	/**
+	 * モジュール公開部分
+	 */
 	self.API = (function() {
 		var objects = {
 			models : self.models
@@ -154,10 +171,14 @@
 		return objects;
 	})();
 
-	global.FieldMaker = self.API;
+	/**
+	 * 名前空間の公開
+	 */
+	global.FieldMaker = self;
 
 })(this, this.document);
 
+// 実際の処理部分
 (function(document) {
 
 	var $ = function(id) {
@@ -171,19 +192,18 @@
 	var PANEL_KIND_NUMBER = 8;
 	var fieldList = [];
 
+	/**
+	 * 初期化
+	 */
 	window.onload = function() {
 		var selectorField = new FieldMaker.models.SelectorField($('selector'))
 		initSelectors(selectorField);
 		initField($('field'), PANEL_LENGTH, PANEL_SIZE, selectorField);
-		// 表示させるのは仮
 		$('output').innerHTML = fieldList;
 	};
 
 	/**
 	 * フィールドを初期化する
-	 * @param : element 表示先element
-	 * @param : panel_len 作成するマップの行数・列数
-	 * @param : panel_size 表示するマップの１セルの辺の長さ(px)
 	 */
 	function initField(element, panel_len, panel_size, selectorField) {
 		var newTable = document.createElement('table');
@@ -215,7 +235,6 @@
 
 	/**
 	 * セレクタを初期化する
-	 * @param : {SelectorField} selectorField
 	 */
 	function initSelectors(selectorField) {
 		var i;
