@@ -20,20 +20,56 @@
 		var objects = {
 
 			/**
-			 * フィールド全体の状態を管理する
+			 * 作成したフィールドの保存を管理する
 			 */
-			Field : function(element) {
-				var panels = [];
-				this.appendPanel = function() {
+			FieldMakerRegistrar : function() {
+				// var panelList = [];
+				//
+				// this.set = function(index, type) {
+				// panelList[index, type];
+				// };
+			},
 
+			/**
+			 * フィールド全体の状態を管理する
+			 * 引数とかinitとか
+			 */
+			Field : function(element, selectorField) {
+				var panelList = [];
+				var defaultList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+				panelList = defaultList.slice();
+
+				//仮
+				var init = function() {
+					var newTable = document.createElement('table');
+					var newTr;
+					var newTd;
+					var panel;
+					var i = 0;
+					for ( i = 0; i < PANEL_LENGTH * PANEL_LENGTH; i++) {
+						if (i % PANEL_LENGTH === 0) {
+							newTr = document.createElement('tr');
+							newTable.appendChild(newTr);
+						}
+						newTd = document.createElement('td');
+						panel = new FieldMaker.models.Panel(newTd, selectorField, panelList, i);
+						selectorField.setSelecting(defaultList[i]);
+						panel.setStatus(selectorField.getSelecting());
+						newTr.appendChild(newTd);
+						panelList[i] = selectorField.getSelecting();
+					}
+					newTable.style.backgroundColor = '#000000';
+					newTable.setAttribute('cellspacing', '1');
+					element.appendChild(newTable);
 				};
+				init();
 			},
 
 			/**
 			 * フィールドの中のパネル一つ一つの状態を管理する
 			 * 引数は仮
 			 */
-			Panel : function(element, selectorField, fieldList, position) {
+			Panel : function(element, selectorField, panelList, position) {
 
 				this.C = {
 					STATUS_WALL : 0,
@@ -57,14 +93,11 @@
 					element.appendChild(document.createTextNode(''));
 					element.onclick = function() {
 						this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
-						fieldList[position] = selectorField.getSelecting();
+						panelList[position] = selectorField.getSelecting();
 						// 表示させるのは仮
-						$('output').innerHTML = fieldList;
+						$('output').innerHTML = panelList;
 					};
 				};
-
-				//仮
-				this.element = element;
 
 				this.setStatus = function(type) {
 					status = type;
@@ -190,7 +223,6 @@
 	var PANEL_SIZE = 48;
 	var PANEL_LENGTH = 10;
 	var PANEL_KIND_NUMBER = 8;
-	var fieldList = [];
 
 	/**
 	 * 初期化
@@ -199,38 +231,13 @@
 		var selectorField = new FieldMaker.models.SelectorField($('selector'))
 		initSelectors(selectorField);
 		initField($('field'), PANEL_LENGTH, PANEL_SIZE, selectorField);
-		$('output').innerHTML = fieldList;
 	};
 
 	/**
 	 * フィールドを初期化する
 	 */
 	function initField(element, panel_len, panel_size, selectorField) {
-		var newTable = document.createElement('table');
-		var newTr;
-		var newTd;
-		var panel;
-		var i = 0;
-		for ( i = 0; i < panel_len * panel_len; i++) {
-			if (i % panel_len === 0) {
-				newTr = document.createElement('tr');
-				newTable.appendChild(newTr);
-			}
-			newTd = document.createElement('td');
-			panel = new FieldMaker.models.Panel(newTd, selectorField, fieldList, i);
-			//初期表示の変化を付けてる
-			// 仮　定数をスタティックに呼び出したい
-			selectorField.setSelecting(panel.C.STATUS_FLAT);
-			if (i % panel_len === 0 || i < panel_len || i > panel_len * panel_len - panel_len || i % panel_len == panel_len - 1) {
-				selectorField.setSelecting(panel.C.STATUS_WALL);
-			}
-			panel.setStatus(selectorField.getSelecting());
-			newTr.appendChild(panel.element);
-			fieldList[i] = selectorField.getSelecting();
-		}
-		newTable.style.backgroundColor = '#000000';
-		newTable.setAttribute('cellspacing', '1');
-		element.appendChild(newTable);
+		var field = new FieldMaker.models.Field(element, selectorField);
 	}
 
 	/**
