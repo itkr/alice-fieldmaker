@@ -1,20 +1,29 @@
 // ライブラリ部分
 (function(global, document) {
 
-	// 仮
-	// この辺りの定数はinit()などで実装パートから定義する
-	// なので今は実装パートと同じ物を書いている
-	var DIR = 'images/';
-	var PANELS = 'panels.png';
-	var PANEL_SIZE = 48;
-	var PANEL_LENGTH = 10;
-	var PANEL_KIND_NUMBER = 8;
-
 	var $ = function(id) {
 		return document.getElementById(id);
 	};
 
 	var self = {};
+
+	self.settings = {
+		DIR : 'images/',
+		PANELS : 'panels.png',
+		PANEL_SIZE : 48,
+		PANEL_LENGTH : 10,
+		PANEL_KIND_NUMBER : 8,
+		DEFAULT_LIST : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+	};
+	
+	self.context = (function(){
+		var objects = {
+			DocumentContext : function(){
+				
+			}
+		};
+		return objects;
+	})();
 
 	self.models = (function() {
 		var objects = {
@@ -23,11 +32,7 @@
 			 * 作成したフィールドの保存を管理する
 			 */
 			FieldMakerRegistrar : function() {
-				// var panelList = [];
-				//
-				// this.set = function(index, type) {
-				// panelList[index, type];
-				// };
+				
 			},
 
 			/**
@@ -36,18 +41,17 @@
 			 */
 			Field : function(element, selectorField) {
 				var panelList = [];
-				var defaultList = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+				var defaultList = self.settings.DEFAULT_LIST;
 				panelList = defaultList.slice();
 
-				//仮
 				var init = function() {
 					var newTable = document.createElement('table');
 					var newTr;
 					var newTd;
 					var panel;
 					var i = 0;
-					for ( i = 0; i < PANEL_LENGTH * PANEL_LENGTH; i++) {
-						if (i % PANEL_LENGTH === 0) {
+					for ( i = 0; i < self.settings.PANEL_LENGTH * self.settings.PANEL_LENGTH; i++) {
+						if (i % self.settings.PANEL_LENGTH === 0) {
 							newTr = document.createElement('tr');
 							newTable.appendChild(newTr);
 						}
@@ -62,6 +66,11 @@
 					newTable.setAttribute('cellspacing', '1');
 					element.appendChild(newTable);
 				};
+
+				this.getPanelList = function() {
+					return panelList;
+				};
+
 				init();
 			},
 
@@ -85,14 +94,12 @@
 				var status = 0;
 
 				var init = function() {
-					element.style.width = PANEL_SIZE - 2 + 'px';
-					element.style.height = PANEL_SIZE - 2 + 'px';
-					element.style.backgroundColor = '#cccccc';
-					element.style.backgroundImage = 'url(' + DIR + PANELS + ')';
-					element.style.backgroundSize = (PANEL_SIZE * PANEL_KIND_NUMBER + 'px ' + PANEL_SIZE + 'px');
-					element.appendChild(document.createTextNode(''));
+					element.style.width = self.settings.PANEL_SIZE - 2 + 'px';
+					element.style.height = self.settings.PANEL_SIZE - 2 + 'px';
+					element.style.backgroundImage = 'url(' + self.settings.DIR + self.settings.PANELS + ')';
+					element.style.backgroundSize = (self.settings.PANEL_SIZE * self.settings.PANEL_KIND_NUMBER + 'px ' + self.settings.PANEL_SIZE + 'px');
 					element.onclick = function() {
-						this.style.backgroundPosition = -(selectorField.getSelecting() * PANEL_SIZE).toString() + 'px' + ' 0';
+						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
 						panelList[position] = selectorField.getSelecting();
 						// 表示させるのは仮
 						$('output').innerHTML = panelList;
@@ -101,7 +108,7 @@
 
 				this.setStatus = function(type) {
 					status = type;
-					element.style.backgroundPosition = -(type * PANEL_SIZE).toString() + 'px' + ' 0';
+					element.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
 					return this;
 				};
 
@@ -159,10 +166,10 @@
 				this.appendSelectorButtons = function(elem, type) {
 					var button = new self.models.SelectorButton(elem, type);
 					selectorButtons.push(button);
-					elem.style.width = PANEL_SIZE + 'px';
-					elem.style.height = PANEL_SIZE + 'px';
-					elem.style.backgroundImage = 'url(' + (DIR + PANELS) + ')'
-					elem.style.backgroundPosition = -(type * PANEL_SIZE).toString() + 'px' + ' 0';
+					elem.style.width = self.settings.PANEL_SIZE + 'px';
+					elem.style.height = self.settings.PANEL_SIZE + 'px';
+					elem.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
+					elem.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
 					elem.onclick = function() {
 						that.setSelecting(type);
 					};
@@ -199,7 +206,8 @@
 	 */
 	self.API = (function() {
 		var objects = {
-			models : self.models
+			models : self.models,
+			settings : self.settings
 		};
 		return objects;
 	})();
@@ -218,25 +226,19 @@
 		return document.getElementById(id);
 	};
 
-	var DIR = 'images/';
-	var PANELS = 'panels.png';
-	var PANEL_SIZE = 48;
-	var PANEL_LENGTH = 10;
-	var PANEL_KIND_NUMBER = 8;
-
 	/**
 	 * 初期化
 	 */
 	window.onload = function() {
 		var selectorField = new FieldMaker.models.SelectorField($('selector'))
 		initSelectors(selectorField);
-		initField($('field'), PANEL_LENGTH, PANEL_SIZE, selectorField);
+		initField($('field'), selectorField);
 	};
 
 	/**
 	 * フィールドを初期化する
 	 */
-	function initField(element, panel_len, panel_size, selectorField) {
+	function initField(element, selectorField) {
 		var field = new FieldMaker.models.Field(element, selectorField);
 	}
 
@@ -245,7 +247,7 @@
 	 */
 	function initSelectors(selectorField) {
 		var i;
-		for ( i = 0; i < PANEL_KIND_NUMBER; i++) {
+		for ( i = 0; i < FieldMaker.settings.PANEL_KIND_NUMBER; i++) {
 			selectorField.appendSelectorButtons(document.createElement('div'), i);
 		}
 		selectorField.setSelecting(0);
