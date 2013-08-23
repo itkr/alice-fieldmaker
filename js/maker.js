@@ -80,6 +80,7 @@
 			 */
 			Panel : function(element, selectorField, panelList, position) {
 
+				// TODO self.settings.TYPESにする
 				this.C = {
 					STATUS_WALL : 0,
 					STATUS_TOPBOTTOM : 1,
@@ -92,18 +93,23 @@
 				}
 
 				var status = 0;
+				var that = this;
+
+				var getCallBack = function() {
+					return function(e) {
+						element.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
+						panelList[position] = selectorField.getSelecting();
+						// 表示させるのは仮
+						$('output').innerHTML = panelList;
+					};
+				};
 
 				var init = function() {
 					element.style.width = self.settings.PANEL_SIZE - 2 + 'px';
 					element.style.height = self.settings.PANEL_SIZE - 2 + 'px';
 					element.style.backgroundImage = 'url(' + self.settings.DIR + self.settings.PANELS + ')';
 					element.style.backgroundSize = (self.settings.PANEL_SIZE * self.settings.PANEL_KIND_NUMBER + 'px ' + self.settings.PANEL_SIZE + 'px');
-					element.onclick = function() {
-						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
-						panelList[position] = selectorField.getSelecting();
-						// 表示させるのは仮
-						$('output').innerHTML = panelList;
-					};
+					element.onclick = getCallBack();
 				};
 
 				this.setStatus = function(type) {
@@ -130,6 +136,13 @@
 					selecting : '3px solid #ff0000',
 					unselecting : '3px solid #ffffff'
 				}
+				
+				var init = function(){
+					element.style.width = self.settings.PANEL_SIZE + 'px';
+					element.style.height = self.settings.PANEL_SIZE + 'px';
+					element.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
+					element.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
+				};
 
 				this.is_selecting = function() {
 					return selecting;
@@ -151,11 +164,15 @@
 					return type;
 				};
 
+				init();
 			},
 
 			/**
 			 * パネルのボタンを選択するボタンを配置するフィールド
 			 * 基本的にこのオブジェクトは一つ作成し処理を委託する（仕様の拡張性のため設計上は複数作成できる）
+			 *
+			 * SelectorButtonは各々が選択されているかという状態を保持しているが
+			 * 実際にはたった一つだけ選択されている状態でなければならないのでSelectorFieldで選択の状態を管理している
 			 */
 			SelectorField : function(element) {
 
@@ -163,16 +180,18 @@
 				var selectorButtons = [];
 				var selectingButtonType = 0;
 
-				var appendSelectorButtons = function(elem, type) {
-					var button = new self.models.SelectorButton(elem, type);
-					selectorButtons.push(button);
-					elem.style.width = self.settings.PANEL_SIZE + 'px';
-					elem.style.height = self.settings.PANEL_SIZE + 'px';
-					elem.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
-					elem.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
-					elem.onclick = function() {
+				var getCallBack = function(type) {
+					return function(e) {
 						that.setSelecting(type);
 					};
+				};
+
+				// TODO これは寧ろSelectorButtonのinitでやれば良いと思う
+				var appendSelectorButtons = function(type) {
+					var elem = document.createElement('div');
+					var button = new self.models.SelectorButton(elem, type);
+					selectorButtons.push(button);
+					elem.onclick = getCallBack(type);
 					element.appendChild(elem);
 					return this;
 				};
@@ -180,9 +199,8 @@
 				var init = function() {
 					var i;
 					for ( i = 0; i < self.settings.PANEL_KIND_NUMBER; i++) {
-						appendSelectorButtons(document.createElement('div'), i);
+						appendSelectorButtons(i);
 					}
-					selectingButtonType = 0;
 				};
 
 				this.setSelecting = function(type) {
@@ -217,23 +235,17 @@
 		return objects;
 	})();
 
-	/**
-	 * 名前空間の公開
-	 */
 	global.FieldMaker = self;
 
 })(this, this.document);
 
 // 実際の処理部分
 (function(document) {
-
 	var $ = function(id) {
 		return document.getElementById(id);
 	};
-
 	window.onload = function() {
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
 	};
-
 })(this.document);
