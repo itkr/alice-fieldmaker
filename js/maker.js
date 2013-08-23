@@ -15,11 +15,11 @@
 		PANEL_KIND_NUMBER : 8,
 		DEFAULT_LIST : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	};
-	
-	self.context = (function(){
+
+	self.context = (function() {
 		var objects = {
-			DocumentContext : function(){
-				
+			DocumentContext : function() {
+
 			}
 		};
 		return objects;
@@ -32,7 +32,7 @@
 			 * 作成したフィールドの保存を管理する
 			 */
 			FieldMakerRegistrar : function() {
-				
+
 			},
 
 			/**
@@ -76,7 +76,7 @@
 
 			/**
 			 * フィールドの中のパネル一つ一つの状態を管理する
-			 * 引数は仮
+			 * 引数は仮、documentContextやコールバック関数をうまく使う
 			 */
 			Panel : function(element, selectorField, panelList, position) {
 
@@ -125,24 +125,24 @@
 			SelectorButton : function(element, type) {
 
 				var type = type;
-				var selected = false;
+				var selecting = false;
 				var STYLES = {
 					selecting : '3px solid #ff0000',
 					unselecting : '3px solid #ffffff'
 				}
 
-				this.is_selected = function() {
-					return selected;
+				this.is_selecting = function() {
+					return selecting;
 				};
 
 				this.select = function() {
-					selected = true;
+					selecting = true;
 					element.style.border = STYLES.selecting;
 					return this;
 				};
 
 				this.unselect = function() {
-					selected = false;
+					selecting = false;
 					element.style.border = STYLES.unselecting;
 					return this;
 				};
@@ -163,7 +163,7 @@
 				var selectorButtons = [];
 				var selectingButtonType = 0;
 
-				this.appendSelectorButtons = function(elem, type) {
+				var appendSelectorButtons = function(elem, type) {
 					var button = new self.models.SelectorButton(elem, type);
 					selectorButtons.push(button);
 					elem.style.width = self.settings.PANEL_SIZE + 'px';
@@ -177,8 +177,12 @@
 					return this;
 				};
 
-				this.getSelectorButtons = function() {
-					return selectorButtons;
+				var init = function() {
+					var i;
+					for ( i = 0; i < self.settings.PANEL_KIND_NUMBER; i++) {
+						appendSelectorButtons(document.createElement('div'), i);
+					}
+					selectingButtonType = 0;
 				};
 
 				this.setSelecting = function(type) {
@@ -194,6 +198,7 @@
 					return selectingButtonType;
 				};
 
+				init();
 			}
 		};
 
@@ -226,31 +231,9 @@
 		return document.getElementById(id);
 	};
 
-	/**
-	 * 初期化
-	 */
 	window.onload = function() {
-		var selectorField = new FieldMaker.models.SelectorField($('selector'))
-		initSelectors(selectorField);
-		initField($('field'), selectorField);
+		var selectorField = new FieldMaker.models.SelectorField($('selector'));
+		var field = new FieldMaker.models.Field($('field'), selectorField);
 	};
-
-	/**
-	 * フィールドを初期化する
-	 */
-	function initField(element, selectorField) {
-		var field = new FieldMaker.models.Field(element, selectorField);
-	}
-
-	/**
-	 * セレクタを初期化する
-	 */
-	function initSelectors(selectorField) {
-		var i;
-		for ( i = 0; i < FieldMaker.settings.PANEL_KIND_NUMBER; i++) {
-			selectorField.appendSelectorButtons(document.createElement('div'), i);
-		}
-		selectorField.setSelecting(0);
-	}
 
 })(this.document);
