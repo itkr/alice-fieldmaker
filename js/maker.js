@@ -7,6 +7,9 @@
 
 	var self = {};
 
+	/**
+	 * 設定定数
+	 */
 	self.settings = {
 		DIR : 'images/',
 		PANELS : 'panels.png',
@@ -16,35 +19,76 @@
 		DEFAULT_LIST : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	};
 
-	self.settings.TYPES = {
-		STATUS_WALL : 0,
-		STATUS_TOPBOTTOM : 1,
-		STATUS_LEFTRIGHT : 2,
-		STATUS_TOPLEFT : 3,
-		STATUS_TOPRIGHT : 4,
-		STATUS_BOTTOMLEFT : 5,
-		STATUS_BOTTOMRIGHT : 6,
-		STATUS_FLAT : 7
-	};
-
-	self.context = (function() {
+	/**
+	 * 汎用ツール
+	 */
+	self.tools = (function() {
 		var objects = {
-			DocumentContext : function() {
-
+			extend : function(Child, Parent) {
+				var NewParent = Parent;
+				if ( typeof Parent.prototype.parent !== "undefined") {
+					NewParent = Animate.tools.extend(Parent, Parent.prototype.parent);
+				}
+				Child.prototype = new NewParent();
+				Child.prototype.parent = NewParent;
+				return Child;
 			}
 		};
 		return objects;
 	})();
 
-	self.models = (function() {
+	/**
+	 * 保存用
+	 */
+	self.registrars = (function() {
 		var objects = {
+
+			/**
+			 * Registrarのベース
+			 * コンクリートオブジェクトでは_keyを定義する
+			 */
+			AbstractRegistrar : function() {
+				var storage = sessionStorage;
+				var checkStrage = function() {
+					if ( typeof sessionStorage !== 'undefined') {
+						return true;
+					}
+					return false;
+				};
+
+				this.set = function(value) {
+					storage.setItem(this.key, value);
+				};
+
+				this.get = function() {
+					return storage.getItem(this.key);
+				};
+
+				this.remove = function() {
+					storage.removeItem(this.key);
+				};
+			},
 
 			/**
 			 * 作成したフィールドの保存を管理する
 			 */
 			FieldMakerRegistrar : function() {
+				var _key = 'FieldMakerRegistrar';
+				this.__defineGetter__("key", function() {
+					return _key;
+				});
+			}
+		};
 
-			},
+		self.tools.extend(objects.FieldMakerRegistrar, objects.AbstractRegistrar);
+		return objects;
+	})();
+
+	/**
+	 * モデル
+	 */
+	self.models = (function() {
+		var objects = {
 
 			/**
 			 * フィールド全体の状態を管理する
@@ -55,7 +99,7 @@
 				var defaultList = self.settings.DEFAULT_LIST;
 				panelList = defaultList.slice();
 
-				var getCallBack = function(position) {
+				var makePanelCallBack = function(position) {
 					return function(e) {
 						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
 						panelList[position] = selectorField.getSelecting();
@@ -76,7 +120,7 @@
 							newTable.appendChild(newTr);
 						}
 						newTd = document.createElement('td');
-						panel = new FieldMaker.models.Panel(newTd, i, getCallBack(i));
+						panel = new FieldMaker.models.Panel(newTd, i, makePanelCallBack(i));
 						selectorField.setSelecting(defaultList[i]);
 						panel.setStatus(selectorField.getSelecting());
 						newTr.appendChild(newTd);
@@ -136,19 +180,17 @@
 				var selectorButtons = [];
 				var selectingButtonType = 0;
 
-				var getCallBack = function(type) {
+				var makeSelectorButtonCallBack = function(type) {
 					return function(e) {
 						that.setSelecting(type);
 					};
 				};
 
-				// TODO これは寧ろSelectorButtonのinitでやれば良いと思う
 				var appendSelectorButtons = function(type) {
 					var elem = document.createElement('div');
-					var button = new self.models.SelectorButton(elem, type, getCallBack(type));
+					var button = new self.models.SelectorButton(elem, type, makeSelectorButtonCallBack(type));
 					selectorButtons.push(button);
 					element.appendChild(elem);
-					return this;
 				};
 
 				var init = function() {
@@ -246,7 +288,6 @@
 		return document.getElementById(id);
 	};
 	window.onload = function() {
-		var fieldMaker = FieldMaker.initialize();
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
 	};
