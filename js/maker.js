@@ -103,8 +103,6 @@
 					return function(e) {
 						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
 						panelList[position] = selectorField.getSelecting();
-						// 表示させるのは仮
-						$('output').innerHTML = panelList;
 					};
 				};
 
@@ -271,9 +269,7 @@
 		var objects = {
 			models : self.models,
 			settings : self.settings,
-			initialize : function() {
-				return new self.context.DocumentContext()
-			}
+			registrars : self.registrars
 		};
 		return objects;
 	})();
@@ -290,5 +286,10 @@
 	window.onload = function() {
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
+		var registrar = new FieldMaker.registrars.FieldMakerRegistrar();
+		$('save').onclick = function(){
+			registrar.set(field.getPanelList());
+			$('output').innerHTML = registrar.get();
+		};
 	};
 })(this.document);
