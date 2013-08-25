@@ -54,7 +54,7 @@
 				var panelList = [];
 				var defaultList = self.settings.DEFAULT_LIST;
 				panelList = defaultList.slice();
-				
+
 				var getCallBack = function(position) {
 					return function(e) {
 						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
@@ -124,49 +124,6 @@
 			},
 
 			/**
-			 * パネルの種類を選択するためのボタン
-			 */
-			SelectorButton : function(element, type, callBack) {
-
-				var type = type;
-				var selecting = false;
-				var STYLES = {
-					selecting : '3px solid #ff0000',
-					unselecting : '3px solid #ffffff'
-				}
-
-				var init = function() {
-					element.style.width = self.settings.PANEL_SIZE + 'px';
-					element.style.height = self.settings.PANEL_SIZE + 'px';
-					element.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
-					element.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
-					element.onclick = callBack;
-				};
-
-				this.is_selecting = function() {
-					return selecting;
-				};
-
-				this.select = function() {
-					selecting = true;
-					element.style.border = STYLES.selecting;
-					return this;
-				};
-
-				this.unselect = function() {
-					selecting = false;
-					element.style.border = STYLES.unselecting;
-					return this;
-				};
-
-				this.getType = function() {
-					return type;
-				};
-
-				init();
-			},
-
-			/**
 			 * パネルのボタンを選択するボタンを配置するフィールド
 			 * 基本的にこのオブジェクトは一つ作成し処理を委託する（仕様の拡張性のため設計上は複数作成できる）
 			 *
@@ -212,6 +169,49 @@
 
 				this.getSelecting = function() {
 					return selectingButtonType;
+				};
+
+				init();
+			},
+
+			/**
+			 * パネルの種類を選択するためのボタン
+			 */
+			SelectorButton : function(element, type, callBack) {
+
+				var type = type;
+				var selecting = false;
+				var STYLES = {
+					selecting : '3px solid #ff0000',
+					unselecting : '3px solid #ffffff'
+				}
+
+				var init = function() {
+					element.style.width = self.settings.PANEL_SIZE + 'px';
+					element.style.height = self.settings.PANEL_SIZE + 'px';
+					element.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
+					element.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
+					element.onclick = callBack;
+				};
+
+				this.is_selecting = function() {
+					return selecting;
+				};
+
+				this.select = function() {
+					selecting = true;
+					element.style.border = STYLES.selecting;
+					return this;
+				};
+
+				this.unselect = function() {
+					selecting = false;
+					element.style.border = STYLES.unselecting;
+					return this;
+				};
+
+				this.getType = function() {
+					return type;
 				};
 
 				init();
