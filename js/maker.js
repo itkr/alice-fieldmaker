@@ -16,6 +16,17 @@
 		DEFAULT_LIST : [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 7, 7, 7, 7, 7, 7, 7, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
 	};
 
+	self.settings.TYPES = {
+		STATUS_WALL : 0,
+		STATUS_TOPBOTTOM : 1,
+		STATUS_LEFTRIGHT : 2,
+		STATUS_TOPLEFT : 3,
+		STATUS_TOPRIGHT : 4,
+		STATUS_BOTTOMLEFT : 5,
+		STATUS_BOTTOMRIGHT : 6,
+		STATUS_FLAT : 7
+	};
+
 	self.context = (function() {
 		var objects = {
 			DocumentContext : function() {
@@ -43,6 +54,15 @@
 				var panelList = [];
 				var defaultList = self.settings.DEFAULT_LIST;
 				panelList = defaultList.slice();
+				
+				var getCallBack = function(position) {
+					return function(e) {
+						this.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
+						panelList[position] = selectorField.getSelecting();
+						// 表示させるのは仮
+						$('output').innerHTML = panelList;
+					};
+				};
 
 				var init = function() {
 					var newTable = document.createElement('table');
@@ -56,7 +76,7 @@
 							newTable.appendChild(newTr);
 						}
 						newTd = document.createElement('td');
-						panel = new FieldMaker.models.Panel(newTd, selectorField, panelList, i);
+						panel = new FieldMaker.models.Panel(newTd, i, getCallBack(i));
 						selectorField.setSelecting(defaultList[i]);
 						panel.setStatus(selectorField.getSelecting());
 						newTr.appendChild(newTd);
@@ -78,38 +98,16 @@
 			 * フィールドの中のパネル一つ一つの状態を管理する
 			 * 引数は仮、documentContextやコールバック関数をうまく使う
 			 */
-			Panel : function(element, selectorField, panelList, position) {
-
-				// TODO self.settings.TYPESにする
-				this.C = {
-					STATUS_WALL : 0,
-					STATUS_TOPBOTTOM : 1,
-					STATUS_LEFTRIGHT : 2,
-					STATUS_TOPLEFT : 3,
-					STATUS_TOPRIGHT : 4,
-					STATUS_BOTTOMLEFT : 5,
-					STATUS_BOTTOMRIGHT : 6,
-					STATUS_FLAT : 7
-				}
-
+			Panel : function(element, position, callBack) {
 				var status = 0;
 				var that = this;
-
-				var getCallBack = function() {
-					return function(e) {
-						element.style.backgroundPosition = -(selectorField.getSelecting() * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
-						panelList[position] = selectorField.getSelecting();
-						// 表示させるのは仮
-						$('output').innerHTML = panelList;
-					};
-				};
 
 				var init = function() {
 					element.style.width = self.settings.PANEL_SIZE - 2 + 'px';
 					element.style.height = self.settings.PANEL_SIZE - 2 + 'px';
 					element.style.backgroundImage = 'url(' + self.settings.DIR + self.settings.PANELS + ')';
 					element.style.backgroundSize = (self.settings.PANEL_SIZE * self.settings.PANEL_KIND_NUMBER + 'px ' + self.settings.PANEL_SIZE + 'px');
-					element.onclick = getCallBack();
+					element.onclick = callBack;
 				};
 
 				this.setStatus = function(type) {
@@ -128,7 +126,7 @@
 			/**
 			 * パネルの種類を選択するためのボタン
 			 */
-			SelectorButton : function(element, type) {
+			SelectorButton : function(element, type, callBack) {
 
 				var type = type;
 				var selecting = false;
@@ -136,12 +134,13 @@
 					selecting : '3px solid #ff0000',
 					unselecting : '3px solid #ffffff'
 				}
-				
-				var init = function(){
+
+				var init = function() {
 					element.style.width = self.settings.PANEL_SIZE + 'px';
 					element.style.height = self.settings.PANEL_SIZE + 'px';
 					element.style.backgroundImage = 'url(' + (self.settings.DIR + self.settings.PANELS) + ')'
 					element.style.backgroundPosition = -(type * self.settings.PANEL_SIZE).toString() + 'px' + ' 0';
+					element.onclick = callBack;
 				};
 
 				this.is_selecting = function() {
@@ -189,9 +188,8 @@
 				// TODO これは寧ろSelectorButtonのinitでやれば良いと思う
 				var appendSelectorButtons = function(type) {
 					var elem = document.createElement('div');
-					var button = new self.models.SelectorButton(elem, type);
+					var button = new self.models.SelectorButton(elem, type, getCallBack(type));
 					selectorButtons.push(button);
-					elem.onclick = getCallBack(type);
 					element.appendChild(elem);
 					return this;
 				};
@@ -230,12 +228,15 @@
 	self.API = (function() {
 		var objects = {
 			models : self.models,
-			settings : self.settings
+			settings : self.settings,
+			initialize : function() {
+				return new self.context.DocumentContext()
+			}
 		};
 		return objects;
 	})();
 
-	global.FieldMaker = self;
+	global.FieldMaker = self.API;
 
 })(this, this.document);
 
@@ -245,6 +246,7 @@
 		return document.getElementById(id);
 	};
 	window.onload = function() {
+		var fieldMaker = FieldMaker.initialize();
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
 	};
