@@ -1,10 +1,6 @@
 // ライブラリ部分
 (function(global, document) {
 
-	var $ = function(id) {
-		return document.getElementById(id);
-	};
-
 	var self = {};
 
 	/**
