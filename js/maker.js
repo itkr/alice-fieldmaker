@@ -57,11 +57,20 @@
 				};
 
 				this.set = function(value) {
-					storage.setItem(this.key, value);
+					storage.setItem(this.key, value.toString());
 				};
 
 				this.get = function() {
-					return storage.getItem(this.key);
+					var data = storage.getItem(this.key);
+					var i;
+					if (data !== null) {
+						var tmpdata = storage.getItem(this.key).split(',');
+						for ( i = 0; i < tmpdata.length; i++) {
+							tmpdata[i] = parseInt(tmpdata[i]);
+						}
+						return tmpdata;
+					}
+					return [];
 				};
 
 				this.remove = function() {
@@ -96,8 +105,6 @@
 			 */
 			Field : function(element, selectorField) {
 				var panelList = [];
-				var defaultList = self.settings.DEFAULT_LIST;
-				panelList = defaultList.slice();
 
 				var makePanelCallBack = function(position) {
 					return function(e) {
@@ -112,6 +119,10 @@
 					var newTd;
 					var panel;
 					var i = 0;
+					var defaultList = new self.registrars.FieldMakerRegistrar().get();
+					if (defaultList.length === 0) {
+						defaultList = self.settings.DEFAULT_LIST;
+					}
 					for ( i = 0; i < self.settings.PANEL_LENGTH * self.settings.PANEL_LENGTH; i++) {
 						if (i % self.settings.PANEL_LENGTH === 0) {
 							newTr = document.createElement('tr');
@@ -287,7 +298,7 @@
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
 		var registrar = new FieldMaker.registrars.FieldMakerRegistrar();
-		$('save').onclick = function(){
+		$('save').onclick = function() {
 			registrar.set(field.getPanelList());
 			$('output').innerHTML = registrar.get();
 		};
