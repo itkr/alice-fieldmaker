@@ -302,5 +302,10 @@
 			registrar.set(field.getPanelList());
 			$('output').innerHTML = registrar.get();
 		};
+		$('reset').onclick = function() {
+			// TODO Fieldを再読み込み
+			registrar.remove();
+			$('output').innerHTML = '';
+		};
 	};
 })(this.document);
