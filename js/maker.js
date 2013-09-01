@@ -56,6 +56,7 @@
 					storage.setItem(this.key, value.toString());
 				};
 
+				// TODO リストに最適化してしまっているので汎用的にする
 				this.get = function() {
 					var data = storage.getItem(this.key);
 					var i;
@@ -294,10 +295,12 @@
 		var selectorField = new FieldMaker.models.SelectorField($('selector'));
 		var field = new FieldMaker.models.Field($('field'), selectorField);
 		var registrar = new FieldMaker.registrars.FieldMakerRegistrar();
+
 		$('save').onclick = function() {
 			registrar.set(field.getPanelList());
 			$('output').innerHTML = registrar.get();
 		};
+
 		$('reset').onclick = function() {
 			// TODO Fieldを再読み込み
 			registrar.remove();
